@@ -2,4 +2,4 @@
 
 $heading = 'About Us';
 
-require "../views/about.view.php";
+require __DIR__ . "/../views/about.view.php";

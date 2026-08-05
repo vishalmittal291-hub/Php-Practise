@@ -124,9 +124,9 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden">
       <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
-        <a href="/practise/index.php" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Home</a>
-        <a href="/practise/about.php" aria-current="page" class="bg-gray-950/50 text-white rounded-md px-3 py-2 text-sm font-medium">About</a>
-        <a href="/practise/contact.php" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Contact</a>
+        <a href="/" class="<?= urlIs('/') ? 'bg-gray-950/50 text-white' : 'text-gray-300' ?> rounded-md px-3 py-2 text-sm font-medium hover:bg-white/5 hover:text-white">Home</a>
+        <a href="/about" class="<?= urlIs('/about') ? 'bg-gray-950/50 text-white' : 'text-gray-300' ?> rounded-md px-3 py-2 text-sm font-medium hover:bg-white/5 hover:text-white">About</a>
+        <a href="/contact" class="<?= urlIs('/contact') ? 'bg-gray-950/50 text-white' : 'text-gray-300' ?> rounded-md px-3 py-2 text-sm font-medium hover:bg-white/5 hover:text-white">Contact</a>
       </div>
       <div class="border-t border-white/10 pt-4 pb-3">
         <div class="flex items-center px-5">

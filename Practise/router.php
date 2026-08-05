@@ -2,26 +2,31 @@
 
 $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
 
+// Normalize trailing slash (e.g. "/about/" -> "/about") so links still match
+if ($uri !== '/' && str_ends_with($uri, '/')) {
+    $uri = rtrim($uri, '/');
+}
+
 $routes = [
-'/' => 'controllers/index.php',
-'/about' => 'controllers/about.php',
-'/contact' => 'controllers/contact.php',
+    '/' => __DIR__ . '/controllers/index.php',
+    '/about' => __DIR__ . '/controllers/about.php',
+    '/contact' => __DIR__ . '/controllers/contact.php',
 ];
 
 function routeToController($uri, $routes) {
-if (array_key_exists($uri, $routes)) {
-require $routes[$uri];
-} else {
-abort();
-}
+    if (array_key_exists($uri, $routes)) {
+        require $routes[$uri];
+    } else {
+        abort();
+    }
 }
 
 function abort($code = 404) {
-http_response_code($code);
+    http_response_code($code);
 
-require "views/{$code}.php";
+    require __DIR__ . "/views/{$code}.php";
 
-die();
+    die();
 }
 
 routeToController($uri, $routes);
