@@ -1,31 +1,28 @@
+<!--
+    Wires up the two toggles from nav.php: the hamburger button (mobile
+    nav panel) and the avatar button (profile dropdown).
+
+    README note: this <script> used to be commented out, which is why
+    neither button did anything — it's active now.
+-->
 <script>
-// Mobile menu toggle
-const mobileMenuButton = document.getElementById("mobile-menu-button");
-const mobileMenu = document.getElementById("mobile-menu");
-const menuOpenIcon = document.getElementById("menu-open-icon");
-const menuCloseIcon = document.getElementById("menu-close-icon");
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenuPanel = document.getElementById('mobile-menu-panel');
+  const profileMenuButton = document.getElementById('profile-menu-button');
+  const profileMenu = document.getElementById('profile-menu');
 
-mobileMenuButton.addEventListener("click", () => {
-  mobileMenu.classList.toggle("hidden");
-  menuOpenIcon.classList.toggle("hidden");
-  menuCloseIcon.classList.toggle("hidden");
-});
+  mobileMenuButton?.addEventListener('click', () => {
+    mobileMenuPanel.classList.toggle('hidden');
+  });
 
-// User dropdown toggle
-const userMenuButton = document.getElementById("user-menu-button");
-const userMenu = document.getElementById("user-menu");
+  profileMenuButton?.addEventListener('click', () => {
+    profileMenu.classList.toggle('hidden');
+  });
 
-userMenuButton.addEventListener("click", () => {
-  userMenu.classList.toggle("show");
-});
-
-// Close dropdown when clicking outside
-document.addEventListener("click", (event) => {
-  if (
-    !userMenuButton.contains(event.target) &&
-    !userMenu.contains(event.target)
-  ) {
-    userMenu.classList.remove("show");
-  }
-});
+  // Clicking anywhere else closes the profile dropdown.
+  document.addEventListener('click', (event) => {
+    if (!profileMenuButton.contains(event.target) && !profileMenu.contains(event.target)) {
+      profileMenu.classList.add('hidden');
+    }
+  });
 </script>

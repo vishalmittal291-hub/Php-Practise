@@ -2,81 +2,92 @@
 
 namespace App;
 
-// Registered with routes in index.php, dispatched via direct().
+// A small class-based router — this is what replaced the old flat
+// router.php once routes needed dynamic segments like {id} and
+// per-verb matching. Register routes with get()/post()/any(), then
+// call direct() once with the real request to actually run one.
 class Router
 {
     protected array $routes = [];
 
-    public function get(string $uri, $action): static
+    public function get(string $path, array $handler): void
     {
-        return $this->addRoute('GET', $uri, $action);
+        $this->addRoute('GET', $path, $handler);
     }
 
-    public function post(string $uri, $action): static
+    public function post(string $path, array $handler): void
     {
-        return $this->addRoute('POST', $uri, $action);
+        $this->addRoute('POST', $path, $handler);
     }
 
-    // Registers the same action for GET and POST.
-    public function any(string $uri, $action): static
+    // Registers the same handler for both GET and POST — used for
+    // pages like /notes/create that show a form on GET and save it on POST.
+    public function any(string $path, array $handler): void
     {
-        $this->addRoute('GET', $uri, $action);
-        $this->addRoute('POST', $uri, $action);
-
-        return $this;
+        $this->addRoute('GET', $path, $handler);
+        $this->addRoute('POST', $path, $handler);
     }
 
-    protected function addRoute(string $method, string $uri, $action): static
+    protected function addRoute(string $method, string $path, array $handler): void
     {
-        $this->routes[$method][$this->normalize($uri)] = $action;
-
-        return $this;
+        $this->routes[] = [
+            'method' => $method,
+            'path' => $path,
+            'handler' => $handler,
+        ];
     }
 
-    protected function normalize(string $uri): string
-    {
-        $path = parse_url($uri, PHP_URL_PATH) ?? '/';
-        $path = rtrim($path, '/');
-
-        return $path === '' ? '/' : $path;
-    }
-
-    // Called once from index.php with the real request; abort(404) if nothing matches.
+    // Takes the real request (REQUEST_URI + REQUEST_METHOD), finds the
+    // first route that matches, and calls its controller action —
+    // passing along any {id}-style segments as arguments.
     public function direct(string $uri, string $method): void
     {
-        $uri = $this->normalize($uri);
-        $method = strtoupper($method);
+        // Strip off any query string (?foo=bar) before matching.
+        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
 
-        foreach ($this->routes[$method] ?? [] as $route => $action) {
-            $pattern = $this->toRegex($route);
+        // Normalize a trailing slash so "/about/" still matches "/about".
+        if ($path !== '/' && str_ends_with($path, '/')) {
+            $path = rtrim($path, '/');
+        }
 
-            if (preg_match($pattern, $uri, $matches)) {
-                $this->call($action, array_slice($matches, 1));
+        foreach ($this->routes as $route) {
+            if ($route['method'] !== $method) {
+                continue;
+            }
+
+            $params = $this->match($route['path'], $path);
+
+            // Use !== null rather than a truthy check — a matched route
+            // with no {id}-style segments legitimately returns an empty
+            // array, which is falsy in PHP and would otherwise look like
+            // "no match" here.
+            if ($params !== null) {
+                [$class, $action] = $route['handler'];
+                $controller = new $class();
+                $controller->$action(...$params);
+
                 return;
             }
         }
 
+        // Nothing matched any registered route — give up with a 404.
         abort(404);
     }
 
-    // Turns "/notes/{id}" into "#^/notes/([^/]+)$#".
-    protected function toRegex(string $route): string
+    // Turns a route like "/notes/{id}" into a regex, tries it against
+    // the real path, and returns the captured segments (e.g. the id)
+    // if it matches — or null if it doesn't.
+    protected function match(string $routePath, string $requestPath): ?array
     {
-        $pattern = preg_replace('#\{[a-zA-Z_]+\}#', '([^/]+)', $route);
+        $pattern = preg_replace('#\{[a-zA-Z_][a-zA-Z0-9_]*\}#', '([^/]+)', $routePath);
+        $pattern = '#^' . $pattern . '$#';
 
-        return '#^' . $pattern . '$#';
-    }
-
-    // $action is [Controller::class, 'method']; instantiates and calls it with captured params.
-    protected function call($action, array $params): void
-    {
-        if (is_callable($action)) {
-            call_user_func_array($action, $params);
-            return;
+        if (!preg_match($pattern, $requestPath, $matches)) {
+            return null;
         }
 
-        [$class, $method] = $action;
+        array_shift($matches); // drop the full-string match, keep only the captured segments
 
-        call_user_func_array([new $class(), $method], $params);
+        return $matches; // may legitimately be [] for routes with no {id}-style segments
     }
 }

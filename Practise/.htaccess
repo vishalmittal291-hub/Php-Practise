@@ -1,3 +1,5 @@
+# Sends every request that isn't a real file or folder to index.php,
+# so our own router gets a chance to handle it.
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

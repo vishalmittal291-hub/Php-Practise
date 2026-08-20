@@ -1,4 +1,4 @@
-<?php // Shared create/edit form. Expects $mode, $note (edit only), $old, $errors, $heading. ?>
+<?php // Shared by both create and edit — expects $mode, $note (edit only), $old, $errors, $heading. ?>
 <?php require __DIR__ . "/partials/head.php"; ?>
 <?php require __DIR__ . "/partials/nav.php"; ?>
 <?php require __DIR__ . "/partials/banner.php"; ?>
@@ -40,6 +40,8 @@
     </form>
 
     <?php if ($mode === 'edit'): ?>
+      <!-- Delete lives in its own tiny form so it can POST on its own,
+           separate from the update form above. -->
       <form
         method="POST"
         action="/notes/<?= e($note['id']) ?>/delete"

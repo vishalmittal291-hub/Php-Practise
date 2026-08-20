@@ -1,4 +1,4 @@
-<?php // Expects $notes (rows from Database::get()) and $heading from NotesController::index() ?>
+<?php // Just needs $notes (from Database::get()) and $heading, both handed over by NotesController::index() ?>
 <?php require __DIR__ . "/partials/head.php"; ?>
 <?php require __DIR__ . "/partials/nav.php"; ?>
 <?php require __DIR__ . "/partials/banner.php"; ?>

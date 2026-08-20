@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-// Routed from index.php for the static pages.
+// The three simple static pages — nothing dynamic happening here,
+// each action just points to its matching view.
 class HomeController
 {
     public function index(): void

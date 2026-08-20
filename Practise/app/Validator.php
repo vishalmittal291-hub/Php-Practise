@@ -2,10 +2,11 @@
 
 namespace App;
 
-// Called by NotesController::create()/edit(); result feeds note.view.php's $errors.
+// A tiny validator: give it the submitted data and a rule string per
+// field (like 'required|min:3|max:1000'), get back an array of error
+// messages keyed by field name. An empty array means everything's good.
 class Validator
 {
-    // $rules e.g. ['body' => 'required|min:3|max:1000']
     public static function validate(array $data, array $rules): array
     {
         $errors = [];
@@ -14,18 +15,16 @@ class Validator
             $value = $data[$field] ?? null;
 
             foreach (explode('|', $ruleString) as $rule) {
-                [$name, $arg] = array_pad(explode(':', $rule, 2), 2, null);
+                $parameter = null;
 
-                $message = match ($name) {
-                    'required' => static::required($value),
-                    'min' => static::min($value, (int) $arg),
-                    'max' => static::max($value, (int) $arg),
-                    default => null,
-                };
+                if (str_contains($rule, ':')) {
+                    [$rule, $parameter] = explode(':', $rule, 2);
+                }
 
-                if ($message) {
-                    $errors[$field][] = $message;
-                    break; // stop at the first failing rule for this field
+                $error = self::check($rule, $value, $parameter, $field);
+
+                if ($error !== null) {
+                    $errors[$field][] = $error;
                 }
             }
         }
@@ -33,22 +32,25 @@ class Validator
         return $errors;
     }
 
-    protected static function required($value): ?string
+    protected static function check(string $rule, mixed $value, ?string $parameter, string $field): ?string
     {
-        return trim((string) $value) === '' ? 'This field is required.' : null;
-    }
+        $value = is_string($value) ? trim($value) : $value;
 
-    protected static function min($value, int $length): ?string
-    {
-        return strlen(trim((string) $value)) < $length
-            ? "This field must be at least {$length} characters."
-            : null;
-    }
+        return match ($rule) {
+            'required' => ($value === null || $value === '')
+                ? ucfirst($field) . ' is required.'
+                : null,
 
-    protected static function max($value, int $length): ?string
-    {
-        return strlen(trim((string) $value)) > $length
-            ? "This field must not exceed {$length} characters."
-            : null;
+            'min' => (isset($value) && strlen((string) $value) < (int) $parameter)
+                ? ucfirst($field) . " must be at least {$parameter} characters."
+                : null,
+
+            'max' => (isset($value) && strlen((string) $value) > (int) $parameter)
+                ? ucfirst($field) . " must be no more than {$parameter} characters."
+                : null,
+
+            // Unknown rule name — don't block the form over a typo in a rule string.
+            default => null,
+        };
     }
 }

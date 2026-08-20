@@ -1,7 +1,10 @@
 <?php
 
-// Global helpers, loaded by index.php before anything else runs.
+// Our little toolbox of global helpers — loaded by index.php before
+// anything else runs, so every one of these is available everywhere.
 
+// Quick and dirty "dump and die" for when you just want to see what's
+// inside a variable and stop the request right there.
 function dd($value)
 {
     echo '<pre>';
@@ -11,13 +14,16 @@ function dd($value)
     die();
 }
 
-// Used in nav.php to highlight the current page.
+// Tells us whether the given path matches the page we're currently on —
+// handy in nav.php for highlighting the active link.
 function urlIs($value)
 {
     return $_SERVER['REQUEST_URI'] === $value;
 }
 
-// Called by app/Router.php and NotesController to bail out with a status + matching view.
+// Bails out of the request with an HTTP status code and shows the
+// matching error view. Used by the router and by NotesController
+// whenever something isn't found or isn't allowed.
 function abort($code = 404)
 {
     http_response_code($code);
@@ -27,13 +33,14 @@ function abort($code = 404)
     die();
 }
 
-// Escapes any value before it hits the page.
+// Never trust anything before it hits the page — this escapes it first.
 function e($value)
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// Re-populates a form field from $old after a failed submission (note.view.php).
+// After a form submission fails validation, this brings back whatever
+// the user typed so they don't have to start over from scratch.
 function old($key, array $old = [], $default = '')
 {
     return e($old[$key] ?? $default);
