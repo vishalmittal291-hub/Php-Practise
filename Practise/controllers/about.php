@@ -1,5 +1,5 @@
 <?php
 
-$heading = 'About Us';
+$heading = 'About';
 
-require __DIR__ . "/../views/about.view.php";
+require __DIR__ . '/../views/about.view.php';

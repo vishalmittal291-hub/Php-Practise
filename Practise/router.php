@@ -13,7 +13,8 @@ $routes = [
     '/contact' => __DIR__ . '/controllers/contact.php',
 ];
 
-function routeToController($uri, $routes) {
+function routeToController($uri, $routes)
+{
     if (array_key_exists($uri, $routes)) {
         require $routes[$uri];
     } else {
@@ -21,7 +22,8 @@ function routeToController($uri, $routes) {
     }
 }
 
-function abort($code = 404) {
+function abort($code = 404)
+{
     http_response_code($code);
 
     require __DIR__ . "/views/{$code}.php";

@@ -6,9 +6,13 @@ class Database
 
     public function __construct()
     {
-        $dsn = "mysql:host=localhost;port=3306;dbname=practise;user=root;charset=utf8mb4";
+        $config = require __DIR__ . '/config.php';
+        $db = $config['db'];
 
-        $this->connection = new PDO($dsn);
+        $dsn = "mysql:host={$db['host']};port={$db['port']};dbname={$db['dbname']};charset={$db['charset']}";
+
+        $this->connection = new PDO($dsn, $db['user'], $db['password']);
+        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     public function query($query)
