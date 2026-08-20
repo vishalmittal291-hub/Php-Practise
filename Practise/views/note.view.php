@@ -41,7 +41,7 @@
 
     <?php if ($mode === 'edit'): ?>
       <!-- Delete lives in its own tiny form so it can POST on its own,
-           separate from the update form above. -->
+          separate from the update form above. -->
       <form
         method="POST"
         action="/notes/<?= e($note['id']) ?>/delete"
